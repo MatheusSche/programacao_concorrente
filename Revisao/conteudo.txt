@@ -1,0 +1,9 @@
+- Criação de processos
+- Pipes
+- Fila de mensagens
+- Área de memoria compartilhada
+- Fifos
+
+ps -aH
+ipcs - MOstra filas de mensagens, areas de memoria compartilhada, semaforos
+-pg (no final para perfilar) -> (executar o código) -> gprof -B ./arquivo (mostra a perfilação)

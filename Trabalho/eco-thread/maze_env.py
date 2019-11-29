@@ -107,14 +107,15 @@ class Maze(tk.Tk, object):
                                  text='Iniciar',
                                  width=10,
                                  command=(lambda
-                                              text='teste':
-                                              self.control.teste(
+                                              text='main':
+                                              self.control.main(
                                               self.input_tub.get(),
                                               self.input_foc.get(),
                                               self.input_peixe.get(),
                                               self.input_algas.get(),
+                                              self.input_cal.get()
 
-                                          )
+                                            )
                                           )
                                  )
         self.btn_ini.place(x=430, y=170)
@@ -126,8 +127,8 @@ class Maze(tk.Tk, object):
                                  text='Parar',
                                  width=10,
                                  command=(lambda
-                                              text='teste':
-                                          self.control.teste(
+                                              text='main':
+                                          self.control.main(
                                               self.input_tub.get(),
                                               self.input_foc.get(),
                                               self.input_peixe.get(),

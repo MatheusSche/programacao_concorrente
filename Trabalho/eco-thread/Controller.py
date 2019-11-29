@@ -37,14 +37,14 @@ class IndividuoThread(threading.Thread):
         y = pos_ecossistema[pos][1]
         self.env.create_image(x,y, self.tipo, self.id)
         
-        while(self.stop_this_thread):
+        while(True):
             time.sleep(2)
             with self.teste:
                 self.semaforo.acquire()
                 try:
-                    print('Thread {} -- Semaforo {}'.format(self.id,self.semaforo._value))
-                    if self.stop_this_thread != False:
-                        if self.tipo != 1:
+                    print('Thread {} -- Semaforo {} -- Calorias {}'.format(self.id,self.semaforo._value, self.calorias))
+                    if self.stop_this_thread != False and self.calorias>0:
+                        if self.tipo != 1 and self.tipo != 0:
                             pos = self.move(pos)
                             self.position = pos
                             x = pos_ecossistema[pos][0]
@@ -53,28 +53,29 @@ class IndividuoThread(threading.Thread):
                             self.env.delete_image(self.id)
                             self.env.create_image(x,y, self.tipo, self.id)
 
-                        if(self.semaforo._value == 0):
-                            print('Liberou entrada')
-                            self.semaforo_validation.release()
+                            
+                        self.calorias-=100     
+
                     else:
                         print('Morreu')
-                        self.semaforo.release()
-                        self.max_t -= self.max_t
 
                         self.env.delete_image(self.id)
-                        self.position = None 
-                        self.calorias = None
-                        self.tipo = None
-                        return
-                        
+                        self.position = 0 
+                        self.calorias = 0
+                        self.tipo = 0
+                    
+                    if self.semaforo._value == 0:
+                        print('Liberou entrada')
+                        self.semaforo_validation.release()
+                             
+                   
+
                 except Exception as e:
                     print(e)
+            time.sleep(1) 
+            
         
-        
-
-                    
-                    
-
+        return  True
             
     
     def move(self, actual_position):
@@ -115,23 +116,20 @@ class Controller:
     def __init__(self):
         self.env = Maze(self)
         self.env.mainloop()
-    def main(self):
-        pass
     
-    def teste(self, tubarao, foca, peixe, alga):
+    
+    def main(self, tubarao, foca, peixe, alga, calorias):
         threads = []
         qtd_tub = int(tubarao)
         qtd_foca = int(foca)
         qtd_peixe = int(peixe)
         qtd_alga = int(alga)
-
-        cal = None 
+        cal = int(calorias) 
+      
+        MAX_THREAD = qtd_foca + qtd_peixe + qtd_tub + qtd_alga
         nome = None
 
-        MAX_THREAD = qtd_foca + qtd_peixe + qtd_tub + qtd_alga
-
-        #import IPython as ipy 
-        #ipy.embed()
+      
         semaforo = threading.Semaphore(MAX_THREAD)
         semaforo_validation = threading.Semaphore(0)
         teste = threading.Lock()
@@ -184,7 +182,8 @@ class Controller:
             threads.append(thread)
             next_id += 1
 
-        thread_validacao = ValidationThread(666, threads, semaforo_validation, semaforo, MAX_THREAD,  teste=teste)
+        thread_validacao = ValidationThread(133, threads, semaforo_validation, semaforo, MAX_THREAD,  teste=teste)
         thread_validacao.start()
+
 
 Controller()

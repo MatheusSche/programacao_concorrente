@@ -23,15 +23,33 @@ class ValidationThread(threading.Thread):
             try:
                 print('Entrou')
                 for animal in self.all_threads:
+                    
                     position_test = animal.position
                     type_test = animal.tipo
-                    for animal_teste in self.all_threads:
-                        if position_test == animal_teste.position:
-                            #alga encontra peixe e morre
-                            if type_test == 1 and animal_teste.tipo == 2:
-                                animal.stop_this_thread = False
-                                print('alga foi comida')
+                 
 
+                    for predador in self.all_threads:
+                        
+                        if position_test == predador.position:
+                    
+                            if type_test == 1 and predador.tipo == 2:
+                                predador.calorias+=animal.calorias
+                                animal.stop_this_thread = False
+                                print('Peixe comeu a alga')
+                               
+                            
+                            elif type_test == 2 and predador.tipo == 3:
+                                predador.calorias+=animal.calorias
+                                animal.stop_this_thread = False
+                                print('Foca comeu o peixe')
+                                
+                            
+                            elif type_test == 3 and predador.tipo == 4:
+                                predador.calorias+=animal.calorias
+                                animal.stop_this_thread = False
+                                print('Tubarão comeu a Foca')
+
+                                
                 for i in range(self.max_thread):
                     self.semaforo.release()
                 

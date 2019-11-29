@@ -9,19 +9,23 @@ from ValidationThread import ValidationThread
 bloquear = True
 
 class IndividuoThread(threading.Thread):
-    def __init__(self, id, calorias, nome, tipo, mutex, env, semaforo):
+    def __init__(self, id, calorias, nome, tipo, semaforo_validation, env, semaforo, teste, max_t):
         self.id = id
-        self.lock = mutex
+        
         self.nome = nome
         self.env = env
-        # 1 == Alga
-        # 2 == Peixe
-        # 3 == Foca
-        # 4 == Tubarao
         self.tipo = tipo
         self.calorias = calorias
         self.position = None
+
+        self.stop_this_thread = True
+        self.death_state = False
+
         self.semaforo = semaforo
+        self.semaforo_validation = semaforo_validation
+        self.teste = teste
+        self.max_t = max_t
+
         threading.Thread.__init__(self)
 
     def run(self):
@@ -33,22 +37,44 @@ class IndividuoThread(threading.Thread):
         y = pos_ecossistema[pos][1]
         self.env.create_image(x,y, self.tipo, self.id)
         
-        while(1):
-            self.semaforo.acquire()
-            try:
-                pos = self.move(pos)
-                self.position = pos
-                x = pos_ecossistema[pos][0]
-                y = pos_ecossistema[pos][1]
-            
-                if self.tipo != 1:
-                    self.env.delete_image(self.id)
-                    self.env.create_image(x,y, self.tipo, self.id)
-                
-                time.sleep(1)
-            finally:
-                pass
-                #self.semaforo.release()
+        while(self.stop_this_thread):
+            time.sleep(2)
+            with self.teste:
+                self.semaforo.acquire()
+                try:
+                    print('Thread {} -- Semaforo {}'.format(self.id,self.semaforo._value))
+                    if self.stop_this_thread != False:
+                        if self.tipo != 1:
+                            pos = self.move(pos)
+                            self.position = pos
+                            x = pos_ecossistema[pos][0]
+                            y = pos_ecossistema[pos][1]
+                                
+                            self.env.delete_image(self.id)
+                            self.env.create_image(x,y, self.tipo, self.id)
+
+                        if(self.semaforo._value == 0):
+                            print('Liberou entrada')
+                            self.semaforo_validation.release()
+                    else:
+                        print('Morreu')
+                        self.semaforo.release()
+                        self.max_t -= self.max_t
+
+                        self.env.delete_image(self.id)
+                        self.position = None 
+                        self.calorias = None
+                        self.tipo = None
+                        return
+                        
+                except Exception as e:
+                    print(e)
+        
+        
+
+                    
+                    
+
             
     
     def move(self, actual_position):
@@ -94,7 +120,6 @@ class Controller:
     
     def teste(self, tubarao, foca, peixe, alga):
         threads = []
-        stdoutmutex = threading.Lock()
         qtd_tub = int(tubarao)
         qtd_foca = int(foca)
         qtd_peixe = int(peixe)
@@ -103,9 +128,14 @@ class Controller:
         cal = None 
         nome = None
 
-        MAX_THREAD = qtd_foca + qtd_peixe + qtd_tub
+        MAX_THREAD = qtd_foca + qtd_peixe + qtd_tub + qtd_alga
 
+        #import IPython as ipy 
+        #ipy.embed()
         semaforo = threading.Semaphore(MAX_THREAD)
+        semaforo_validation = threading.Semaphore(0)
+        teste = threading.Lock()
+        
 
         thread_timer = TimerThread(596, self.env)
         thread_timer.start()
@@ -114,9 +144,17 @@ class Controller:
         
         #faz o numero de tubarao
         for i in range(qtd_tub):
-            tipo = 2
+            tipo = 4
             
-            thread = IndividuoThread(next_id, cal, nome, tipo, stdoutmutex, self.env, semaforo)
+            thread = IndividuoThread(next_id, 
+                                    cal, 
+                                    nome, 
+                                    tipo, 
+                                    semaforo_validation,
+                                    self.env, 
+                                    semaforo,
+                                    teste=teste,
+                                    max_t=MAX_THREAD)
             thread.start()
             threads.append(thread)
             next_id+=1
@@ -125,15 +163,15 @@ class Controller:
         for i in range(qtd_foca):
             tipo = 3
             
-            thread = IndividuoThread(next_id, cal, nome, tipo, stdoutmutex, self.env, semaforo)
+            thread = IndividuoThread(next_id, cal, nome, tipo, semaforo_validation, self.env, semaforo,  teste=teste, max_t=MAX_THREAD)
             thread.start()
             threads.append(thread)
             next_id += 1
 
         # faz o numero de peixe
         for i in range(qtd_peixe):
-            tipo = 4
-            thread = IndividuoThread(next_id, cal, nome, tipo, stdoutmutex, self.env, semaforo)
+            tipo = 2
+            thread = IndividuoThread(next_id, cal, nome, tipo, semaforo_validation, self.env, semaforo,   teste=teste, max_t=MAX_THREAD)
             thread.start()
             threads.append(thread)
             next_id += 1
@@ -141,12 +179,12 @@ class Controller:
         # faz o numero de peixe
         for i in range(qtd_alga):
             tipo = 1
-            thread = IndividuoThread(next_id, cal, nome, tipo, stdoutmutex, self.env, semaforo)
+            thread = IndividuoThread(next_id, cal, nome, tipo, semaforo_validation, self.env, semaforo,   teste=teste, max_t=MAX_THREAD)
             thread.start()
             threads.append(thread)
             next_id += 1
 
-        thread_validacao = ValidationThread(666, threads, stdoutmutex, semaforo, MAX_THREAD)
+        thread_validacao = ValidationThread(666, threads, semaforo_validation, semaforo, MAX_THREAD,  teste=teste)
         thread_validacao.start()
 
 Controller()

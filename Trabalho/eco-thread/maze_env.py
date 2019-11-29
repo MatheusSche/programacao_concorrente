@@ -25,8 +25,8 @@ class Maze(tk.Tk, object):
         self._build_maze()
         self.img_foca = tk.PhotoImage(file="focaT.png").subsample(30)
         self.img_alga = tk.PhotoImage(file="alga.png").subsample(30)
-        self.img_tubarao = tk.PhotoImage(file="peixe.png").subsample(15)
-        self.img_peixe = tk.PhotoImage(file="tubarao.png").subsample(90)
+        self.img_tubarao = tk.PhotoImage(file="tubarao.png").subsample(90)
+        self.img_peixe = tk.PhotoImage(file="peixe.png").subsample(15)
         self.imagens = {}
 
     def _build_maze(self):

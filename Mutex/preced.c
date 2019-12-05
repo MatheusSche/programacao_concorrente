@@ -27,9 +27,7 @@ int main(){
     sem_init(&sem1, 0, 0);
     sem_init(&sem2, 0, 0);
 
-    
     pthread_create(&th, NULL, expressao, NULL);
-
     
     a = 1;
     sem_wait(&sem1);

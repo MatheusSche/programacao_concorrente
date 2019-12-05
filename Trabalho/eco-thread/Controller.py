@@ -6,8 +6,6 @@ from timer import TimerThread
 import time
 from ValidationThread import ValidationThread
 
-bloquear = True
-
 class IndividuoThread(threading.Thread):
     def __init__(self, id, calorias, nome, tipo, semaforo_validation, env, semaforo, teste, max_t):
         self.id = id
@@ -37,7 +35,7 @@ class IndividuoThread(threading.Thread):
         y = pos_ecossistema[pos][1]
         self.env.create_image(x,y, self.tipo, self.id)
         
-        while(True):
+        while(1):
             time.sleep(2)
             with self.teste:
                 self.semaforo.acquire()
@@ -52,9 +50,7 @@ class IndividuoThread(threading.Thread):
                                 
                             self.env.delete_image(self.id)
                             self.env.create_image(x,y, self.tipo, self.id)
-
-                            
-                        self.calorias-=100     
+                            self.calorias-=100     
 
                     else:
                         print('Morreu')
@@ -117,27 +113,26 @@ class Controller:
         self.env = Maze(self)
         self.env.mainloop()
     
-    
     def main(self, tubarao, foca, peixe, alga, calorias):
-        threads = []
         qtd_tub = int(tubarao)
         qtd_foca = int(foca)
         qtd_peixe = int(peixe)
         qtd_alga = int(alga)
         cal = int(calorias) 
       
+        threads = []
         MAX_THREAD = qtd_foca + qtd_peixe + qtd_tub + qtd_alga
         nome = None
 
-      
+        self.env.p.set(MAX_THREAD)
+
         semaforo = threading.Semaphore(MAX_THREAD)
         semaforo_validation = threading.Semaphore(0)
         teste = threading.Lock()
         
-
         thread_timer = TimerThread(596, self.env)
         thread_timer.start()
-        #threads.append(thread_timer)
+
         next_id = 0
         
         #faz o numero de tubarao
@@ -182,7 +177,7 @@ class Controller:
             threads.append(thread)
             next_id += 1
 
-        thread_validacao = ValidationThread(133, threads, semaforo_validation, semaforo, MAX_THREAD,  teste=teste)
+        thread_validacao = ValidationThread(133, threads, semaforo_validation, semaforo, MAX_THREAD, self.env)
         thread_validacao.start()
 
 

@@ -35,14 +35,30 @@ class Maze(tk.Tk, object):
                            width=MAZE_W * UNIT * 2)
         # Caixa de Texto
         ##################################################################
-        self.tex = tk.Text(master=self.canvas, height=10, width=40)
-        self.tex.place(x=430, y=200)
+        #self.tex = tk.Text(master=self.canvas, height=10, width=40)
+        #self.tex.place(x=430, y=200)
         # timer
         self.t = tk.StringVar()
         self.t.set("00:00:00")
         self.lb = tk.Label(self.canvas, textvariable=self.t)
         self.lb.config(font=("Courier 20 bold"))
         self.lb.place(x=660, y=5)
+
+        # Titulo Placar
+        self.lplacar = tk.StringVar()
+        self.lplacar.set("Quantidade:")
+        self.lpp = tk.Label(self.canvas, textvariable=self.lplacar)
+        self.lpp.config(font=("Courier 12 bold"))
+        self.lpp.place(x=660, y=60)
+        ##########################################################################
+        
+        # Placar
+        self.p = tk.StringVar()
+        self.p.set("00")
+        self.lp = tk.Label(self.canvas, textvariable=self.p)
+        self.lp.config(font=("Courier 20 bold"))
+        self.lp.place(x=700, y=100)
+        ##########################################################################
 
         # Botões e labels
         ##########################################################3
@@ -123,21 +139,15 @@ class Maze(tk.Tk, object):
 
         # Botao parar
         ##################################################################
-        self.btn_stop = tk.Button(self.canvas,
-                                 text='Parar',
-                                 width=10,
-                                 command=(lambda
-                                              text='main':
-                                          self.control.main(
-                                              self.input_tub.get(),
-                                              self.input_foc.get(),
-                                              self.input_peixe.get(),
-                                              self.input_algas.get(),
-
-                                          )
-                                          )
-                                 )
-        self.btn_stop.place(x=530, y=170)
+        #self.btn_stop = tk.Button(self.canvas,
+        #                         text='Parar',
+        #                         width=10,
+        #                         command=(lambda
+        #                                      text='stop':
+        #                                      self.control.stop_threads()
+        #                                )
+        #                        )
+        #self.btn_stop.place(x=530, y=170)
         ############################################################
 
 
